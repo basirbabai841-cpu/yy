@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TenderFit – tender checks and compliance drafts</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#eef1ec;--panel:#fbfcfa;--ink:#1b2a2f;--mute:#5b6b70;--line:#cfd7d2;--acc:#0f6b62;--accink:#fff;--ok:#0f6b62;--okbg:#dcefe9;--no:#a8321f;--nobg:#f6dcd6;--rv:#8a5a00;--rvbg:#f5e8c6;--grid:#dfe5df}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141b1d;--panel:#1c2528;--ink:#e6eeea;--mute:#9fb0aa;--line:#33423f;--acc:#4fc3b0;--accink:#0d1a18;--ok:#6fd8c3;--okbg:#17352f;--no:#ff9a86;--nobg:#42211b;--rv:#f0c25e;--rvbg:#3b2f10;--grid:#1b2528}}
+:root[data-theme="dark"]{--bg:#141b1d;--panel:#1c2528;--ink:#e6eeea;--mute:#9fb0aa;--line:#33423f;--acc:#4fc3b0;--accink:#0d1a18;--ok:#6fd8c3;--okbg:#17352f;--no:#ff9a86;--nobg:#42211b;--rv:#f0c25e;--rvbg:#3b2f10;--grid:#1b2528}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px}
+h1,h2,h3{font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;margin:0;line-height:1.1}
+header{max-width:1100px;margin:0 auto;padding:36px 20px 8px}
+h1{font-size:clamp(2rem,6vw,3.4rem);font-weight:800;letter-spacing:-.02em;max-width:16ch}
+.lede{max-width:60ch;color:var(--mute);margin:12px 0 0}
+main{max-width:1100px;margin:0 auto;padding:16px 20px 60px;display:grid;gap:18px}
+section.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:20px}
+section.card>h2{font-size:1.35rem;margin-bottom:4px}
+.sub{color:var(--mute);margin:0 0 14px;font-size:.92rem}
+.grid2{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+label{display:block;font-weight:600;font-size:.88rem;margin-bottom:4px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:9px 10px}
+textarea{min-height:92px;resize:vertical}
+#tender{min-height:220px}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+button{font:inherit;font-weight:600;border-radius:4px;padding:10px 16px;border:1px solid var(--acc);background:var(--acc);color:var(--accink);cursor:pointer}
+button.ghost{background:transparent;color:var(--acc)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.stats{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));margin-bottom:14px}
+.stat{border:1px solid var(--line);border-radius:4px;padding:10px 12px}
+.stat b{display:block;font:800 1.7rem "Trebuchet MS","Segoe UI",sans-serif}
+.stat span{font-size:.82rem;color:var(--mute)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.92rem;margin-bottom:12px}
+.meta b{font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chips button{padding:6px 12px;font-size:.88rem}
+.chips button[aria-pressed="true"]{background:var(--acc);color:var(--accink)}
+.chips button[aria-pressed="false"]{background:transparent;color:var(--acc)}
+.req{border-top:1px solid var(--line);padding:12px 0;display:grid;gap:6px;grid-template-columns:90px 1fr}
+.tag{display:inline-block;font-weight:600;font-size:.8rem;border-radius:3px;padding:2px 8px;white-space:nowrap}
+.tag.met{background:var(--okbg);color:var(--ok)}.tag.unmet{background:var(--nobg);color:var(--no)}.tag.review{background:var(--rvbg);color:var(--rv)}
+.req .cl{font-weight:600;font-size:.85rem;color:var(--mute);overflow-wrap:anywhere}
+.req p{margin:0 0 4px}.req small{color:var(--mute);display:block}
+#draft{min-height:340px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88rem;line-height:1.5}
+.note{font-size:.85rem;color:var(--mute);border-left:3px solid var(--rv);padding-left:10px;margin-top:12px}
+#msg{min-height:1.4em;font-size:.9rem;color:var(--mute)}
+.hide{display:none}
+@media (max-width:560px){.req{grid-template-columns:1fr}}
+@media print{body{background:#fff;color:#000}header,#profileCard,#inputCard,.row,.chips,.note{display:none}section.card{border:0}#draft{min-height:0;border:0}}
+</style>
+</head>
+<body>
+<header>
+<h1>Read the tender in minutes, not days</h1>
+<p class="lede">Save your firm's credentials once. Paste any tender and TenderFit pulls out every requirement, checks it against your profile, and drafts the compliance response. You review and sign off.</p>
+</header>
+<main>
+<section class="card" id="profileCard">
+<h2>1. Your firm profile</h2>
+<p class="sub">Stored only in this browser. Better detail means better matching.</p>
+<div class="grid2">
+<div><label for="pName">Firm name</label><input id="pName" autocomplete="organization"></div>
+<div><label for="pInd">Industry</label><select id="pInd"><option>Construction</option><option>Engineering</option><option>Medical / healthcare</option><option>Other</option></select></div>
+<div><label for="pYears">Years in business</label><input id="pYears" type="number" min="0"></div>
+<div><label for="pTurn">Average annual turnover (number)</label><input id="pTurn" type="number" min="0" placeholder="e.g. 250000"></div>
+<div><label for="pIns">Insurance / liability cover (number)</label><input id="pIns" type="number" min="0" placeholder="e.g. 1000000"></div>
+<div><label for="pReg">Regions you work in</label><input id="pReg" placeholder="e.g. Balochistan, Sindh"></div>
+</div>
+<div class="grid2" style="margin-top:14px">
+<div><label for="pCert">Certifications, licences, registrations (one per line)</label><textarea id="pCert" placeholder="ISO 9001&#10;PEC Category C4&#10;Tax registration"></textarea></div>
+<div><label for="pProj">Past projects (one per line, with value and year)</label><textarea id="pProj" placeholder="School block, 120,000, 2023"></textarea></div>
+<div><label for="pStaff">Key staff and qualifications</label><textarea id="pStaff" placeholder="Site engineer, BSc Civil, 8 years"></textarea></div>
+</div>
+<div class="row"><button id="saveP">Save profile</button><button class="ghost" id="sampleP">Fill example profile</button><span id="pMsg" role="status"></span></div>
+</section>
+
+<section class="card" id="inputCard">
+<h2>2. Add the tender</h2>
+<p class="sub">Paste the tender text, or load a .txt file. For PDFs, copy the text out and paste it here.</p>
+<label for="tender">Tender text</label>
+<textarea id="tender" placeholder="Paste the tender document here…"></textarea>
+<div class="row">
+<button id="run">Analyse tender</button>
+<label class="ghost" style="margin:0"><input id="file" type="file" accept=".txt,.md,text/plain" class="hide"><span role="button" tabindex="0" id="fileBtn" style="border:1px solid var(--acc);color:var(--acc);padding:10px 16px;border-radius:4px;cursor:pointer;font-weight:600;display:inline-block">Load .txt file</span></label>
+<button class="ghost" id="sampleT">Try a sample tender</button>
+<button class="ghost" id="clear">Clear</button>
+</div>
+<div id="msg" role="status"></div>
+</section>
+
+<section class="card hide" id="results">
+<h2>3. Requirements check</h2>
+<p class="sub" id="srcNote"></p>
+<div class="stats" id="stats"></div>
+<div class="meta" id="meta"></div>
+<div class="chips" id="chips"></div>
+<div id="list"></div>
+</section>
+
+<section class="card hide" id="draftCard">
+<h2>4. Draft compliance response</h2>
+<p class="sub">Edit freely before you copy or download it.</p>
+<textarea id="draft" aria-label="Draft compliance response"></textarea>
+<div class="row"><button id="copy">Copy</button><button class="ghost" id="dl">Download .txt</button><button class="ghost" id="print">Print</button><span id="dMsg" role="status"></span></div>
+</section>
+</main>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const KEY="tenderfit.profile.v1";
+let reqs=[],info={},filter="all",source="Rules engine";
+
+/* ---------- profile ---------- */
+const PF=["pName","pInd","pYears","pTurn","pIns","pReg","pCert","pProj","pStaff"];
+function getP(){const o={};PF.forEach(k=>o[k]=$(k).value.trim());return o}
+function setP(o){PF.forEach(k=>{if(o[k]!==undefined)$(k).value=o[k]})}
+try{const s=localStorage.getItem(KEY);if(s)setP(JSON.parse(s))}catch(e){}
+$("saveP").onclick=()=>{try{localStorage.setItem(KEY,JSON.stringify(getP()));$("pMsg").textContent="Profile saved in this browser."}catch(e){$("pMsg").textContent="Could not save here, but the profile will still be used for this session."}};
+$("sampleP").onclick=()=>{setP({pName:"Rahim & Sons Builders",pInd:"Construction",pYears:"9",pTurn:"450000",pIns:"500000",pReg:"Balochistan, Sindh",pCert:"ISO 9001\nPEC Category C4\nNational Tax Number registration\nOSHA safety training certificate",pProj:"Government primary school block, 180,000, 2023\nDistrict road repair package, 220,000, 2022",pStaff:"Site engineer, BSc Civil, 8 years\nSafety officer, OSHA certified"});$("pMsg").textContent="Example profile filled. Save it or edit it."};
+
+/* ---------- sample tender ---------- */
+const SAMPLE=`Tender No. 2026/BLD/114 – Construction of Community Health Centre, Quetta District
+Bids must be submitted before 30 November 2026 at 11:00 AM.
+1.1 The bidder shall hold a valid PEC registration in Category C4 or higher.
+1.2 The bidder must have a minimum of 5 years of experience in building construction.
+1.3 The bidder shall have completed at least two similar projects each valued at not less than 150,000 within the last five years.
+2.1 The bidder must provide evidence of average annual turnover of at least 400,000 over the last three years.
+2.2 Professional liability insurance cover of not less than 1,000,000 is mandatory.
+3.1 The bidder shall hold a valid ISO 9001 quality management certificate.
+3.2 The bidder must submit a valid ISO 14001 environmental certificate.
+3.3 A registered safety officer with OSHA certification shall be on site at all times.
+4.1 The bidder must submit a bid security of 2% of the estimated cost in the form of a pay order.
+4.2 All bidders shall submit a valid tax registration and a tax clearance certificate.
+4.3 The contractor must deploy a qualified civil engineer with a minimum of 10 years of experience.
+5.1 Estimated project value is 3,500,000. Completion period shall not exceed 12 months.`;
+$("sampleT").onclick=()=>{$("tender").value=SAMPLE;$("msg").textContent="Sample tender loaded. Click Analyse tender."};
+$("clear").onclick=()=>{$("tender").value="";$("results").classList.add("hide");$("draftCard").classList.add("hide");$("msg").textContent=""};
+$("fileBtn").onclick=()=>$("file").click();
+$("fileBtn").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("file").click()}};
+$("file").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$("tender").value=r.result;$("msg").textContent="Loaded "+f.name+"."};r.onerror=()=>{$("msg").textContent="Could not read that file. Paste the text instead."};r.readAsText(f)};
+
+/* ---------- rules engine ---------- */
+const MULT={thousand:1e3,k:1e3,lakh:1e5,lac:1e5,million:1e6,m:1e6,crore:1e7,billion:1e9,bn:1e9};
+function money(s){const r=[];const re=/(?:[$€£]|rs\.?|pkr|usd)?\s?(\d[\d,]*(?:\.\d+)?)\s*(thousand|million|billion|lakh|lac|crore|bn|k|m)?\b/gi;let m;while((m=re.exec(s))){let n=parseFloat(m[1].replace(/,/g,""));if(m[2])n*=MULT[m[2].toLowerCase()];r.push(n)}return r}
+const CATS=[["Deadline",/\b(before|deadline|closing|no later than|submitted by|opening date)\b.*\b(20\d\d|am|pm)\b|\bbids? (must|shall) be submitted\b/i],
+["Insurance",/insurance|liability cover|indemnity/i],
+["Financial",/turnover|bid security|bank guarantee|financial|net worth|pay order|earnest|solvency/i],
+["Experience",/years? of experience|experience|similar projects?|completed at least|track record|previous projects?/i],
+["Certification",/\b(ISO ?\d+|OSHA|PEC|licen[cs]e|registration|registered|certificat|accredit|tax clearance|NTN|SECP|FBR)/i],
+["Personnel",/engineer|staff|personnel|officer|manager|qualified|technician|supervisor/i],
+["Other",/./]];
+const KEYW=/\b(shall|must|required?|mandatory|minimum|at least|not less than|should|valid|submit|provide|evidence|deadline|before|no later than|estimated|completion)\b/i;
+function cat(t){for(const [n,r] of CATS)if(r.test(t))return n;return"Other"}
+function norm(s){return s.toLowerCase().replace(/[^a-z0-9 ]/g," ")}
+function has(P,term){return norm(P.pCert+" "+P.pProj+" "+P.pStaff).includes(norm(term).trim())}
+function evaluate(t,c,P){
+ const certs=[...t.matchAll(/\b(ISO ?\d{4,5}|OSHA|PEC(?: registration)?(?: in)? ?(?:Category)? ?[A-Z]?\d?|NTN|SECP|FBR|tax (?:registration|clearance)|PE|PMP)\b/gi)].map(m=>m[1].trim());
+ let status="review",ev="Needs a human check against your records.",act="Confirm with your documents.";
+ const yrs=t.match(/(\d+)\s*(?:\+\s*)?years?/i);
+ const amts=money(t.replace(/\b20\d\d\b/g,"").replace(/\d+\s*years?/gi,"").replace(/\d+\s*months?/gi,"").replace(/\d+%/g,"").replace(/\b\d\.\d\b/g,"")).filter(n=>n>=1000);
+ if(c==="Insurance"&&amts.length){const need=Math.max(...amts),have=+P.pIns||0;if(!have){ev="No insurance cover on your profile.";act="Add cover details or arrange insurance."}else if(have>=need){status="met";ev="Your cover "+have.toLocaleString()+" meets "+need.toLocaleString()+"."}else{status="unmet";ev="Your cover "+have.toLocaleString()+" is below "+need.toLocaleString()+".";act="Arrange extra cover or a joint venture."}}
+ else if(c==="Financial"&&/turnover/i.test(t)&&amts.length){const need=Math.max(...amts),have=+P.pTurn||0;if(!have){ev="No turnover on your profile.";act="Add average annual turnover."}else if(have>=need){status="met";ev="Your turnover "+have.toLocaleString()+" meets "+need.toLocaleString()+"."}else{status="unmet";ev="Your turnover "+have.toLocaleString()+" is below "+need.toLocaleString()+".";act="Consider a joint venture or subcontract role."}}
+ else if(c==="Experience"&&yrs&&/experience/i.test(t)&&!/\bproject/i.test(t)){const need=+yrs[1],have=+P.pYears||0;if(!have){ev="No years in business on your profile.";act="Add years in business."}else if(have>=need){status="met";ev=have+" years in business meets "+need+".";}else{status="unmet";ev=have+" years is below the "+need+" required.";act="Cannot meet alone; consider a joint venture."}}
+ else if(c==="Experience"&&/project/i.test(t)){const projs=P.pProj.split("\n").filter(Boolean);const need=amts.length?Math.max(...amts):0;const nm=(t.match(/\b(at least|minimum of)\s+(one|two|three|four|five|\d+)\b/i)||[])[2];const n={one:1,two:2,three:3,four:4,five:5}[(nm||"").toLowerCase()]||+nm||1;const good=projs.filter(p=>{const a=money(p.replace(/\b20\d\d\b/g,"")).filter(x=>x>=1000);return !need||a.some(x=>x>=need)});if(good.length>=n){status="met";ev=good.length+" matching project(s): "+good.slice(0,2).join("; ")}else{status=projs.length?"unmet":"review";ev=good.length+" of "+n+" required similar projects found in your list.";act="Add qualifying projects or partner with a firm that has them."}}
+ else if(certs.length){const miss=certs.filter(x=>!has(P,x));if(!miss.length){status="met";ev="Found on your profile: "+certs.join(", ")+"."}else{status="unmet";ev="Not on your profile: "+miss.join(", ")+".";act="Obtain or attach "+miss.join(", ")+", or confirm it is on file."}}
+ else if(c==="Personnel"){const staff=P.pStaff.toLowerCase();const role=(t.match(/(civil engineer|safety officer|project manager|site engineer|architect|surveyor|electrical engineer|mechanical engineer|doctor|nurse|biomedical)/i)||[])[1];if(role&&staff.includes(role.toLowerCase().split(" ")[0])){status="review";ev="You list staff matching '"+role+"'. Check their qualifications and years against the clause.";}else if(role){status="unmet";ev="No '"+role+"' on your staff list.";act="Add or hire this role."}}
+ else if(c==="Deadline"){status="review";ev="Deadline. Put it in your calendar.";act="Plan to submit one day early."}
+ return{status,ev,act};
+}
+function extractInfo(txt){
+ const o={};const t=txt.split("\n").find(l=>l.trim());o.title=t?t.trim().slice(0,140):"Untitled tender";
+ const d=txt.match(/(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+20\d\d(?:\s+at\s+[\d:]+\s*(?:AM|PM)?)?)|(20\d\d-\d\d-\d\d)|(\d{1,2}\/\d{1,2}\/20\d\d)/i);o.deadline=d?d[0]:"Not found";
+ const v=txt.match(/(?:estimated|project|contract)\s+(?:project\s+)?(?:value|cost)[^\d]{0,25}([\d,\.]+\s*(?:million|lakh|crore|k|m)?)/i);o.value=v?v[1].trim():"Not found";
+ const dur=txt.match(/(?:completion|duration|period)[^\d]{0,40}(\d+)\s*(months?|weeks?|days?)/i);o.duration=dur?dur[1]+" "+dur[2]:"Not found";return o}
+function analyse(txt,P){
+ const lines=txt.split(/\n+/).flatMap(l=>l.length>400?l.split(/(?<=[.;])\s+(?=[A-Z0-9])/):[l]).map(l=>l.trim()).filter(l=>l.length>20);
+ const out=[];let n=0;
+ lines.forEach((l,i)=>{if(!KEYW.test(l))return;n++;const m=l.match(/^\(?([0-9]+(?:\.[0-9]+)*[a-z]?|[A-Z]\.|[a-z]\))\)?[\s.:-]+/);const clause=m?m[1].replace(/\.$/,""):"Line "+(i+1);const text=m?l.slice(m[0].length):l;const c=cat(text);const e=evaluate(text,c,P);out.push({id:n,clause,text,category:c,status:e.status,evidence:e.ev,action:e.act})});
+ return out}
+
+/* ---------- render ---------- */
+const LAB={met:"✓ Met",unmet:"✗ Not met",review:"? Review"};
+function esc(s){const d=document.createElement("div");d.textContent=s;return d.innerHTML}
+function render(){
+ const c={met:0,unmet:0,review:0};reqs.forEach(r=>c[r.status]++);
+ $("stats").innerHTML='<div class="stat"><b>'+reqs.length+'</b><span>Requirements found</span></div><div class="stat"><b>'+c.met+'</b><span>✓ Met</span></div><div class="stat"><b>'+c.unmet+'</b><span>✗ Not met</span></div><div class="stat"><b>'+c.review+'</b><span>? Need review</span></div>';
+ $("meta").innerHTML='<span><b>Tender:</b> '+esc(info.title||"")+'</span><span><b>Deadline:</b> '+esc(info.deadline||"")+'</span><span><b>Value:</b> '+esc(info.value||"")+'</span><span><b>Duration:</b> '+esc(info.duration||"")+'</span>';
+ $("srcNote").textContent="Checked by: "+source+".";
+ const f=[["all","All"],["unmet","Not met"],["review","Review"],["met","Met"]];
+ $("chips").innerHTML=f.map(([k,v])=>'<button data-f="'+k+'" aria-pressed="'+(filter===k)+'">'+v+'</button>').join("");
+ $("chips").querySelectorAll("button").forEach(b=>b.onclick=()=>{filter=b.dataset.f;render()});
+ const rows=reqs.filter(r=>filter==="all"||r.status===filter);
+ $("list").innerHTML=rows.length?rows.map(r=>'<div class="req"><div><span class="tag '+r.status+'">'+LAB[r.status]+'</span><div class="cl">Clause '+esc(String(r.clause).replace(/^Line /,"line "))+'</div></div><div><p>'+esc(r.text)+'</p><small>'+esc(r.category)+' · '+esc(r.evidence||"")+'</small>'+(r.status!=="met"&&r.action?'<small><b>Next step:</b> '+esc(r.action)+'</small>':"")+'</div></div>').join(""):'<p class="sub">No requirements in this view.</p>';
+ $("results").classList.remove("hide");buildDraft()}
+function buildDraft(){
+ const P=getP();const L=[];
+ L.push("COMPLIANCE RESPONSE – DRAFT");L.push("Tender: "+(info.title||""));L.push("Bidder: "+(P.pName||"[Firm name]")+"  |  Closing: "+(info.deadline||"[date]"));
+ L.push("Prepared "+new Date().toISOString().slice(0,10)+".");L.push("");
+ const summary=["met","unmet","review"].map(s=>reqs.filter(r=>r.status===s).length);
+ L.push("Summary: "+summary[0]+" met, "+summary[1]+" not met, "+summary[2]+" to verify.");L.push("");
+ reqs.forEach(r=>{
+  L.push("Clause "+String(r.clause).replace(/^Line /,"line ")+" ("+r.category+")");L.push("Requirement: "+r.text);
+  if(r.status==="met")L.push("Response: "+(P.pName||"The bidder")+" confirms compliance. "+r.evidence+" Supporting documents attached: [attach].");
+  else if(r.status==="unmet")L.push("Response: [ACTION] Not currently met. "+r.evidence+" "+(r.action||""));
+  else L.push("Response: [VERIFY] "+r.evidence+" "+(r.action||""));
+  L.push("")});
+ L.push("Authorised signatory: ____________________   Date: ____________");
+ $("draft").value=L.join("\n");$("draftCard").classList.remove("hide")}
+
+/* ---------- actions ---------- */
+$("run").onclick=()=>{
+ const txt=$("tender").value.trim();if(txt.length<40){$("msg").textContent="Paste at least a few lines of tender text first.";return}
+ const P=getP();info=extractInfo(txt);reqs=analyse(txt,P);source="rule-based text matching (no AI, nothing generated)";filter="all";
+ if(!reqs.length){$("msg").textContent="No requirement sentences found. Check that the pasted text includes words like 'shall' or 'must'.";return}
+ $("msg").textContent=reqs.length+" requirements found."+(P.pName?"":" Tip: fill in your firm profile for better matching.");render();$("results").scrollIntoView({behavior:"smooth"})};
+
+$("copy").onclick=async()=>{try{await navigator.clipboard.writeText($("draft").value);$("dMsg").textContent="Copied."}catch(e){$("draft").select();$("dMsg").textContent="Press Ctrl+C to copy the selected text."}};
+$("print").onclick=()=>window.print();
+$("dl").onclick=()=>{try{const b=new Blob([$("draft").value],{type:"text/plain"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="compliance-draft.txt";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);$("dMsg").textContent="Downloaded."}catch(e){$("dMsg").textContent="Download failed. Use Copy instead."}};
+
+})();
+</script>
+</body>
+</html>
